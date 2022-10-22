@@ -12,6 +12,10 @@
 * perf: use hash_hasher where the key is Cid [#467]
 * chore: upgrade to libp2p 0.39.1, update most of the other deps with the notable exception of cid and multihash [#472]
 * refactor(swarm): swarm cleanup following libp2p upgrade to v0.39.1 [#473]
+* fix: strict ordering for DAG-CBOR-encoded map keys [#493]
+* feat: upgrade libp2p to v0.43.0 [#499]
+* feat(http): default values for --bits and --profile [#502]
+* feat: return time since connecting began instead of null for latency [#479]
 
 [#429]: https://github.com/rs-ipfs/rust-ipfs/pull/429
 [#428]: https://github.com/rs-ipfs/rust-ipfs/pull/428
@@ -27,6 +31,10 @@
 [#467]: https://github.com/rs-ipfs/rust-ipfs/pull/467
 [#472]: https://github.com/rs-ipfs/rust-ipfs/pull/472
 [#473]: https://github.com/rs-ipfs/rust-ipfs/pull/473
+[#493]: https://github.com/rs-ipfs/rust-ipfs/pull/493
+[#499]: https://github.com/rs-ipfs/rust-ipfs/pull/499
+[#502]: https://github.com/rs-ipfs/rust-ipfs/pull/502
+[#479]: https://github.com/rs-ipfs/rust-ipfs/pull/479
 
 # 0.2.1
 

@@ -59,16 +59,18 @@ pub enum InitializationError {
 pub fn init(
     ipfs_path: &Path,
     bits: NonZeroU16,
-    profiles: Vec<Profile>,
+    mut profiles: Vec<Profile>,
 ) -> Result<String, InitializationError> {
     use multibase::Base::Base64Pad;
     use prost::Message;
     use std::fs::OpenOptions;
     use std::io::{BufWriter, Write};
 
-    if profiles.len() != 1 {
-        unimplemented!("Multiple profiles are currently unsupported!")
-    }
+    match profiles.len() {
+        0 => profiles.push(Profile::Default),
+        1 => {}
+        _ => unimplemented!("Multiple profiles are currently unsupported!"),
+    };
 
     let bits = bits.get();
 
@@ -91,7 +93,7 @@ pub fn init(
     let kp = ipfs::Keypair::rsa_from_pkcs8(&mut pkcs8)
         .expect("Failed to turn pkcs#8 into libp2p::identity::Keypair");
 
-    let peer_id = kp.public().into_peer_id().to_string();
+    let peer_id = kp.public().to_peer_id().to_string();
 
     // TODO: this part could be PR'd to rust-libp2p as they already have some public key
     // import/export but probably not if ring does not support these required conversions.
@@ -193,7 +195,7 @@ pub fn load(config: File) -> Result<Config, LoadingError> {
 
     let kp = config_file.identity.load_keypair()?;
 
-    let peer_id = kp.public().into_peer_id().to_string();
+    let peer_id = kp.public().to_peer_id().to_string();
 
     if peer_id != config_file.identity.peer_id {
         return Err(LoadingError::PeerIdMismatch {
@@ -370,7 +372,7 @@ aGVsbG8gd29ybGQ=
             .load_keypair()
             .unwrap()
             .public()
-            .into_peer_id()
+            .to_peer_id()
             .to_string();
 
         assert_eq!(peer_id, input.peer_id);

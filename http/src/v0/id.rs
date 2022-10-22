@@ -39,9 +39,9 @@ async fn identity_query<T: IpfsTypes>(
 
     match ipfs.identity().await {
         Ok((public_key, addresses)) => {
-            let peer_id = public_key.clone().into_peer_id();
+            let peer_id = public_key.to_peer_id();
             let id = peer_id.to_string();
-            let public_key = Base64Pad.encode(public_key.into_protobuf_encoding());
+            let public_key = Base64Pad.encode(public_key.to_protobuf_encoding());
 
             let addresses = addresses.into_iter().map(|addr| addr.to_string()).collect();
 
@@ -64,7 +64,9 @@ async fn identity_query<T: IpfsTypes>(
 pub struct Query {
     // the peer id to query
     arg: Option<String>,
-    // this does not seem to be reacted to by go-ipfs
+    // FIXME: this does not seem to be reacted to by go-ipfs (need to recheck with more recent
+    // version, remove if no longer interesting)
+    #[allow(unused)]
     format: Option<String>,
 }
 

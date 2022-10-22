@@ -321,10 +321,17 @@ impl<T: WriteCbor + 'static> WriteCbor for BTreeMap<String, T> {
     #[inline]
     fn write_cbor<W: Write>(&self, w: &mut W) -> CborResult<()> {
         write_u64(w, 5, self.len() as u64)?;
-        for (k, v) in self {
+        let mut keys: Vec<&String> = self.keys().collect();
+
+        // See: https://github.com/ipld/ipld/blob/master/specs/codecs/dag-cbor/spec.md#strictness
+        keys.sort_by(|l, r| l.len().cmp(&r.len()).then_with(|| l.cmp(r)));
+
+        for k in keys {
+            let v = self.get(k).unwrap();
             k.write_cbor(w)?;
             v.write_cbor(w)?;
         }
+
         Ok(())
     }
 }
@@ -389,6 +396,9 @@ pub fn read_f64<R: Read>(r: &mut R) -> CborResult<f64> {
 
 #[inline]
 pub fn read_bytes<R: Read>(r: &mut R, len: usize) -> CborResult<Vec<u8>> {
+    if len > 64 * 1024 {
+        return Err(CborError::LengthOutOfRange);
+    }
     let mut buf = vec![0; len];
     r.read_exact(&mut buf)?;
     Ok(buf)
@@ -403,6 +413,9 @@ pub fn read_str<R: Read>(r: &mut R, len: usize) -> CborResult<String> {
 
 #[inline]
 pub fn read_list<R: Read, T: ReadCbor>(r: &mut R, len: usize) -> CborResult<Vec<T>> {
+    if len.saturating_mul(std::mem::size_of::<T>()) > 64 * 1024 {
+        return Err(CborError::LengthOutOfRange);
+    }
     let mut list: Vec<T> = Vec::with_capacity(len);
     for _ in 0..len {
         list.push(T::read_cbor(r)?);
